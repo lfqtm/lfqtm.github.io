@@ -7,11 +7,11 @@ title: 关于我
 
 ### A litle Java Learner, Keep It...
 
-> *Java后端开发*
+Java后端开发
 
 ### 如何联系我 
 
-> *email：740942486@qq.com*
+email：740942486@qq.com
 
 <!-- {% include comments.html %} -->
 
