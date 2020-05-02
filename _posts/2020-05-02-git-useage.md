@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Servlet配置和尝试使用
-date: 2020-05-02
+title: git命名的简单汇总
+date: 2020-04-29
 categories: tools
 tags: git github
 ---

@@ -1,0 +1,403 @@
+I"�\<h2 id="请求与响应requestresponse">请求与响应(Request&amp;Response)</h2>
+
+<p><img src="/images/posts/Request.assets/image-20200418200649988.png" alt="image-20200418200649988" /></p>
+
+<p><strong>request对象和response对象的原理</strong></p>
+
+<ol>
+  <li>request和response对象是由服务器创建的,我们只能调用</li>
+  <li>request对象是来获取请求消息,response对象是来设置响应消息</li>
+</ol>
+
+<h3 id="请求request">请求Request</h3>
+
+<h4 id="1-request对象继承体系结构">1. request对象继承体系结构</h4>
+
+<p>SerletRequst  –接口
+    | 继承
+HttpServletRequest –接口
+	| 实现
+org.apache.catalina.connector.RequestFacade –类(tomcat源码实现)</p>
+
+<h4 id="2-request功能">2. request功能</h4>
+
+<h5 id="1-获取请求消息数据">1. 获取请求消息数据</h5>
+
+<blockquote>
+  <p>数据格式: 请求行,请求头,请求空行,请求体</p>
+</blockquote>
+
+<ol>
+  <li>
+    <p>获取请求行数据</p>
+
+    <p><code class="highlighter-rouge">GET /day14/demo1?name=zhangsan HTTP/1.1</code></p>
+
+    <p>方法:  可以用来区分用户的浏览器做浏览器适配</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1.获取请求方式: GET</span>
+<span class="nc">String</span> <span class="nf">getMethod</span><span class="o">();</span>
+<span class="c1">// 2.获取虚拟目录: /day14  </span>
+<span class="nc">String</span> <span class="nf">getContextPath</span><span class="o">();</span> <span class="c1">// 常用</span>
+<span class="c1">// 3.获取Servlet路径: /demo1</span>
+<span class="nc">String</span> <span class="nf">getServletPath</span><span class="o">();</span>
+<span class="c1">// 4.获取get方式请求参数: name=zhangsan</span>
+<span class="nc">String</span> <span class="nf">getQueryString</span><span class="o">();</span>
+<span class="c1">// 5.获取请求的URI以及URL: /day14/demo1  http://localhost/day14/demo1</span>
+<span class="cm">/**
+URL: 同统一资源定位符  中华人民共和国
+URI: 统一资源标识符  共和国
+*/</span>
+<span class="nc">String</span> <span class="nf">getRequestURI</span><span class="o">();</span> <span class="c1">// 常用</span>
+<span class="nc">StringBuffer</span> <span class="nf">getRequestURL</span><span class="o">();</span>  
+<span class="c1">// 6.获取协议及版本: HTTP/1.1</span>
+<span class="nc">String</span> <span class="nf">getProtocol</span><span class="o">();</span>
+<span class="c1">// 7.获取客户机的IP地址</span>
+<span class="nc">String</span> <span class="nf">getRemoteAddr</span><span class="o">();</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>获取请求头数据</p>
+
+    <ul>
+      <li><code class="highlighter-rouge">String getHeader(String name); </code> 通过请求头名称获取请求头的值 (<strong>主要使用这个方法</strong>)</li>
+      <li><code class="highlighter-rouge">Enumeration&lt;String&gt; getHeaderNames();</code>  获取所有的请求头名称</li>
+    </ul>
+  </li>
+  <li>
+    <p>获取请求体数据</p>
+
+    <ul>
+      <li>
+        <p>请求方式必须是POST,才有请求体数据</p>
+      </li>
+      <li>
+        <p>操作步骤</p>
+
+        <ol>
+          <li>
+            <p>获取对象流</p>
+
+            <p><code class="highlighter-rouge">BufferedReader getReader()</code> : 获取字符输入流,只可以操作字符数据</p>
+
+            <p><code class="highlighter-rouge">ServletInputStream getInputStream()</code>: 获取直接输入流,可以操作所有类型数据</p>
+          </li>
+          <li>
+            <p>再从流中拿数据</p>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h5 id="2-其他功能重要为了更方便使用request对象的方法-----alarm_clock">2. 其他功能(重要,为了更方便使用request对象的方法) ​ ​ ​ ​ :alarm_clock:</h5>
+
+<ol>
+  <li>
+    <p><strong>获取请求参数(通用,get和post都可用)</strong></p>
+
+    <ol>
+      <li><code class="highlighter-rouge">String getParameter(String name)</code>: 根据参数名称获取参数值</li>
+      <li><code class="highlighter-rouge">String[] getParameterValues(String name)</code>: 根据参数名称获取 参数名称和参数值的数组;多用于复选框(<code class="highlighter-rouge">hobby=xx&amp;hobby=xx2</code>)</li>
+      <li><code class="highlighter-rouge">Enumeration&lt;String&gt; getParameterNames()</code>: 获取所有请求的参数名称</li>
+      <li><code class="highlighter-rouge">Map&lt;String,String[]&gt; getParameterMap()</code> : 获取所有参数的map集合</li>
+    </ol>
+
+    <p><strong>补充: 中文乱码问题</strong></p>
+
+    <ul>
+      <li>get方式: tomcat8已结将get方式乱码问题解决了</li>
+      <li>post方式: 会乱码 (解决方案: 在获取参数前,设置request的编码<code class="highlighter-rouge">request.setCharacterEncoding("utf-8")</code>)</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>请求转发</strong></p>
+
+    <ol>
+      <li>步骤:
+        <ul>
+          <li>通过request对象获取请求转发器对象: <code class="highlighter-rouge">request.getRequestDispatcher(String path)</code></li>
+          <li>使用RequestDispatcher对象来进行转发: <code class="highlighter-rouge">forward(ServletRequest request, ServletResponse response)</code></li>
+        </ul>
+      </li>
+      <li>特点
+        <ul>
+          <li>浏览器地址栏路径不发生变化</li>
+          <li>只能转发到当前服务器内部资源(无法跳转到其他服务器url)</li>
+          <li>转发始终只有一次请求</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p><strong>共享数据(请求转发需要传递数据)</strong></p>
+
+    <ul>
+      <li>域对象: 一个有作用范围的对象,可以在范围内共享数据</li>
+      <li>request域: 代表一次请求的范围,一般用于请求转发的多个资源中共享数据
+        <ol>
+          <li><code class="highlighter-rouge">void setAttribute(String name,Object obj)</code>:存储数据</li>
+          <li><code class="highlighter-rouge">Object getAttribute(String name)</code>: 通过键获取值</li>
+          <li><code class="highlighter-rouge">void removeAttribute(String name)</code>: 通过键移除键值对</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>获取ServletContext</strong></p>
+
+    <p>方法: <code class="highlighter-rouge">getServletContext()</code></p>
+  </li>
+</ol>
+
+<h3 id="响应response">响应response</h3>
+
+<h4 id="1-响应数据格式">1. 响应数据格式</h4>
+
+<ul>
+  <li>响应行
+    <ol>
+      <li>格式: <code class="highlighter-rouge">协议/版本 响应状态码 状态码描述</code></li>
+      <li>什么是状态码: 服务器告诉客户端本次请求和响应的一个状态(<em>都是三位数字</em>)
+        <ul>
+          <li>1xx : 服务器接收客户顿消息,但并没有接收完成,等待一段时间后,发送1xx</li>
+          <li>2xx : 请求和响应成功</li>
+          <li>3xx : 重定向 (<code class="highlighter-rouge">302</code> - 重定向页面; <code class="highlighter-rouge">304</code> - 访问缓存)</li>
+          <li>4xx : 客户端错误  (<code class="highlighter-rouge">404</code> - 请求路径错误; <code class="highlighter-rouge">405</code> - 请求方式没有对应的doXXX方法)</li>
+          <li>5xx : 服务器端异常 <code class="highlighter-rouge">500</code> - 服务端代码错误</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>响应头</p>
+
+    <ol>
+      <li>格式 : 头名称 : 值</li>
+      <li>常见响应头
+        <ul>
+          <li><code class="highlighter-rouge">Content-Type</code> : 本次响应的数据格式和编码格式</li>
+          <li><code class="highlighter-rouge">Content-disposition</code> : 服务器告诉客户端以什么格式打开响应体数据</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>响应空行</p>
+
+    <p>间隔响应头和响应体</p>
+  </li>
+  <li>
+    <p>响应体</p>
+
+    <p>响应数据,图片和网页等</p>
+  </li>
+</ul>
+
+<h4 id="2-response对象">2. response对象</h4>
+
+<ol>
+  <li>设置响应行
+    <ul>
+      <li><code class="highlighter-rouge">setStatus(int sc)</code></li>
+    </ul>
+  </li>
+  <li>设置响应头
+    <ul>
+      <li><code class="highlighter-rouge">setHeader(String name, String value)</code></li>
+    </ul>
+  </li>
+  <li>设置响应体(<strong>步骤</strong>)
+    <ol>
+      <li>获取输入流
+        <ul>
+          <li>字符输出流: <code class="highlighter-rouge">PrintWriter getWriter()</code></li>
+          <li>直接输出流 : <code class="highlighter-rouge">ServletOutputStream getOutPutStream()</code></li>
+        </ul>
+      </li>
+      <li>使用输出流,输出到客户端浏览器</li>
+    </ol>
+  </li>
+</ol>
+
+<h4 id="3-response案例">3. response案例</h4>
+
+<ol>
+  <li>
+    <p>重定向 (资源跳转)</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1.设置状态码</span>
+<span class="n">response</span><span class="o">.</span><span class="na">setStatus</span><span class="o">(</span><span class="mi">302</span><span class="o">);</span> <span class="c1">// 重定向状态码</span>
+<span class="c1">// 2.设置响应头</span>
+<span class="n">response</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"location"</span><span class="o">,</span> <span class="s">"/day14/responseDemo2"</span><span class="o">);</span>
+   
+<span class="c1">// 3.简单的重定向方式</span>
+<span class="n">response</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="s">"/day15/responseDemo2"</span><span class="o">);</span>
+</code></pre></div>    </div>
+
+    <p><em>与转发的比较</em></p>
+
+    <ul>
+      <li>转发(forward)
+        <ol>
+          <li>转发地址栏路径不变</li>
+          <li>转发只能访问当前服务器下的资源</li>
+          <li>转发只是一次请求,可以使用request对象来共享数据</li>
+        </ol>
+      </li>
+      <li>重定向(redirect)
+        <ol>
+          <li>地址栏发生变化</li>
+          <li>重定向可以访问其他站点资源</li>
+          <li>重定向是两次求情,不能使用request对象来共享数据</li>
+        </ol>
+      </li>
+    </ul>
+
+    <p><em>路径写法</em></p>
+
+    <ul>
+      <li>
+        <p>路径分类</p>
+
+        <ol>
+          <li>相对路径: 通过相对位置关系确定位置(以点开头 ./ 或者 ../)</li>
+          <li>绝对路径: <code class="highlighter-rouge">/day14/responseDemo2</code>或者url地址</li>
+        </ol>
+      </li>
+      <li>
+        <p>判断规则 : 判断定义的路径是给谁用的?判断请求从哪来</p>
+
+        <ol>
+          <li>
+            <p>给客户端浏览器使用 : 需要添加虚拟路径(典型的重定向)</p>
+          </li>
+          <li>
+            <p>给服务器使用 :不需要加虚拟路径(典型的转发)</p>
+          </li>
+          <li>
+            <p><strong>动态获取虚拟目录</strong></p>
+
+            <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 动态获取虚拟目录</span>
+<span class="nc">String</span> <span class="n">contextPath</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getContextPath</span><span class="o">();</span>
+<span class="c1">// 重定向</span>
+<span class="n">response</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="n">contextPath</span> <span class="o">+</span> <span class="s">"/responseDemo2"</span><span class="o">);</span>
+</code></pre></div>            </div>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>服务器输出字符数据到浏览器</p>
+  </li>
+  <li>
+    <p>服务器输出字节数据到浏览器</p>
+
+    <ol>
+      <li>
+        <p>获取字节输出流</p>
+
+        <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 0.设置编码</span>
+<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html;charset=utf-8"</span><span class="o">);</span>
+<span class="c1">// 1.获取输出流(字节)</span>
+<span class="nc">ServletOutputStream</span> <span class="n">sos</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">();</span>
+<span class="c1">// 2.输出数据</span>
+<span class="n">sos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="s">"你好"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">));</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>输出数据 <code class="highlighter-rouge">write()</code> : 不需要刷新,输出后自动释放</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>服务器输出字符数据到浏览器</p>
+
+    <ol>
+      <li>
+        <p>获取字符输出流</p>
+
+        <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 最推荐的解决中文乱码问题</span>
+<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html;charset=utf-8"</span><span class="o">);</span>
+<span class="c1">// 1.获取字符输出流</span>
+<span class="nc">PrintWriter</span> <span class="n">pw</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">();</span>
+<span class="c1">// 2.输出数据</span>
+<span class="n">pw</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="s">"hello response"</span><span class="o">);</span> <span class="c1">// 写入response,可以解析html标签</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>输出数据 <code class="highlighter-rouge">write()</code> : 不需要刷新,输出后自动释放</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>验证码验证案例</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">100</span><span class="o">;</span>
+<span class="kt">int</span> <span class="n">heigth</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>
+<span class="c1">// 1.创建一个对象,图片</span>
+<span class="nc">BufferedImage</span> <span class="n">image</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedImage</span><span class="o">(</span><span class="n">width</span><span class="o">,</span><span class="n">heigth</span><span class="o">,</span><span class="nc">BufferedImage</span><span class="o">.</span><span class="na">TYPE_INT_RGB</span><span class="o">);</span>
+   
+<span class="c1">// 2.美化图片</span>
+<span class="c1">// 2.1 填充背景色</span>
+<span class="nc">Graphics</span> <span class="n">g</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="na">getGraphics</span><span class="o">();</span> <span class="c1">// 画笔对象</span>
+<span class="n">g</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="nc">Color</span><span class="o">.</span><span class="na">pink</span><span class="o">);</span>
+<span class="n">g</span><span class="o">.</span><span class="na">fillRect</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span> <span class="n">width</span><span class="o">,</span> <span class="n">heigth</span><span class="o">);</span>
+   
+<span class="c1">// 2.2 边框</span>
+<span class="n">g</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="nc">Color</span><span class="o">.</span><span class="na">blue</span><span class="o">);</span>
+<span class="n">g</span><span class="o">.</span><span class="na">drawRect</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">);</span>
+   
+<span class="c1">// 2.3 写验证码</span>
+<span class="nc">String</span> <span class="n">string</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"</span><span class="o">;</span>
+<span class="c1">// 创建随机角标</span>
+<span class="nc">Random</span> <span class="n">ran</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">ran</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">string</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+    <span class="c1">// 获取随机角标对应的随机字符</span>
+    <span class="kt">char</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+    <span class="c1">// 2.3写验证码</span>
+    <span class="n">g</span><span class="o">.</span><span class="na">drawString</span><span class="o">(</span><span class="n">ch</span> <span class="o">+</span> <span class="s">""</span><span class="o">,</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">i</span><span class="o">,</span> <span class="n">heigth</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+<span class="o">}</span>
+   
+<span class="c1">// 2.3 画干扰线</span>
+<span class="n">g</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="nc">Color</span><span class="o">.</span><span class="na">green</span><span class="o">);</span>
+<span class="c1">// 随机生成坐标点</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">ran</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">width</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">ran</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">width</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">ran</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">heigth</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">ran</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">heigth</span><span class="o">);</span>
+    <span class="n">g</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">x1</span><span class="o">,</span> <span class="n">y1</span><span class="o">,</span> <span class="n">x2</span><span class="o">,</span> <span class="n">y2</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="n">g</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="mi">30</span><span class="o">);</span>
+<span class="c1">// 3.将图片输出到页面中</span>
+<span class="nc">ImageIO</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">image</span><span class="o">,</span> <span class="s">"jpg"</span><span class="o">,</span> <span class="n">response</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+
+    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;script&gt;</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// 1.获取图片对象</span>
+        <span class="kd">var</span> <span class="nx">img</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">checkCode</span><span class="dl">"</span><span class="p">);</span>
+        <span class="c1">// 2.绑定单击事件</span>
+        <span class="nx">img</span><span class="p">.</span><span class="nx">onclick</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// 加时间戳,欺骗服务器</span>
+            <span class="kd">var</span> <span class="nx">date</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTime</span><span class="p">();</span>
+            <span class="nx">img</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">/day14/checkCodeServlet</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">date</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+   
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;img</span> <span class="na">id=</span><span class="s">"checkCode"</span> <span class="na">src=</span><span class="s">"/day14/checkCodeServlet"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">"change"</span> <span class="na">href=</span><span class="s">"看不清换一张?"</span><span class="nt">&gt;&lt;/a&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+:ET

@@ -1,0 +1,164 @@
+I"<h2 id="servlet">Servlet</h2>
+
+<h3 id="概述">概述</h3>
+
+<blockquote>
+  <p>server applet: 运行在服务器端的小程序</p>
+</blockquote>
+
+<p><img src="/images/posts/Servlet.assets/image-20200417080316701.png" alt="image-20200417080316701" /></p>
+
+<ol>
+  <li>Servlet就是一个接口,定义了Java类被浏览器访问(Tomcat识别)到的规则</li>
+  <li>将来自定义的类需要实现Servlet接口,复写方法</li>
+</ol>
+
+<h3 id="快速入门">快速入门</h3>
+
+<ol>
+  <li>
+    <p>创建JavaEE项目</p>
+  </li>
+  <li>
+    <p>定义一个类,实现Servlet接口</p>
+  </li>
+  <li>
+    <p>实现接口中的抽象方法</p>
+  </li>
+  <li>
+    <p>配置Servlet</p>
+
+    <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 配置servlet --&gt;</span>
+<span class="nt">&lt;servlet&gt;</span>
+    <span class="c">&lt;!-- 配置servlet名称 --&gt;</span>
+    <span class="nt">&lt;servlet-name&gt;</span>demo1<span class="nt">&lt;/servlet-name&gt;</span>
+    <span class="c">&lt;!-- 实现servlet类 --&gt;</span>
+    <span class="nt">&lt;servlet-class&gt;</span>cn.itcast.web.servlet.ServletDemo1<span class="nt">&lt;/servlet-class&gt;</span>
+<span class="nt">&lt;/servlet&gt;</span>
+   
+<span class="nt">&lt;servlet-mapping&gt;</span>
+    <span class="c">&lt;!-- 名称 --&gt;</span>
+    <span class="nt">&lt;servlet-name&gt;</span>demo1<span class="nt">&lt;/servlet-name&gt;</span>
+    <span class="c">&lt;!-- /名称  表示路径--&gt;</span>
+    <span class="nt">&lt;url-pattern&gt;</span>/demo1<span class="nt">&lt;/url-pattern&gt;</span>
+<span class="nt">&lt;/servlet-mapping&gt;</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h3 id="执行原理">执行原理</h3>
+
+<p><img src="/images/posts/Servlet.assets/image-20200418094723229.png" alt="image-20200418094723229" /></p>
+
+<ol>
+  <li>当服务器接收到哭护短浏览器的请求后,会解析URL路径,获取访问的Servler的资源路径</li>
+  <li>查找web,xml文件,是否有对应的<url-pattern>标签内容</url-pattern></li>
+  <li>如果有,再查询,<servlet-class>的全类名</servlet-class></li>
+  <li>tomcat会将字节码文件加载进内存,并创建其对象</li>
+  <li>调用方法</li>
+</ol>
+
+<h3 id="servlet的生命周期">Servlet的生命周期</h3>
+
+<ol>
+  <li>
+    <p>被创建: 执行init方法,只执行一次</p>
+
+    <ul>
+      <li>
+        <p>可以修改web.xml,指定什么时候为创建时机</p>
+
+        <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">在servlet标签下配置</span>
+<span class="mi">1</span><span class="o">.</span> <span class="n">第一次被访问时</span><span class="o">,</span><span class="n">创建</span><span class="o">(&lt;</span><span class="n">load</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">startup</span><span class="o">&gt;</span><span class="n">的值设为负数</span><span class="o">)</span>
+<span class="mi">2</span><span class="o">.</span> <span class="n">服务器启动时</span><span class="o">,</span><span class="n">创建</span><span class="o">(&lt;</span><span class="n">load</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">startup</span><span class="o">&gt;</span><span class="n">的值设为0或者正整数</span><span class="o">)</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>init方法只执行一次,Servlet是单例的</p>
+        <ol>
+          <li>多个用户访问时,可能存在安全问题</li>
+          <li>解决方法,尽量不要在Servlet定义成员变量.即使定义,也不要修改</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>提供服务: 执行service方法,执行多次</p>
+
+    <ul>
+      <li>每次访问ervlet时,都会被调用</li>
+    </ul>
+  </li>
+  <li>
+    <p>被销毁: 执行destroy方法,只执行一次</p>
+
+    <ul>
+      <li>只有当服务器正常关闭时,才能执行destroy方法</li>
+    </ul>
+
+    <h4 id="生命周期的是三个方法">生命周期的是三个方法</h4>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+* 初始化方法 在Servlet被创建时执行,且只执行一次,最先执行...
+*/</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="nc">ServletConfig</span> <span class="n">servletConfig</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">ServletException</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"init方法..."</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="cm">/**
+* 获取ServletConfig对象   ServletConfig: Servlet的配置对象
+*/</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="nc">ServletConfig</span> <span class="nf">getServletConfig</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+<span class="cm">/**
+* 提供服务方法
+* 每一次Servlet被访问时执行,执行多次
+*/</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">service</span><span class="o">(</span><span class="nc">ServletRequest</span> <span class="n">servletRequest</span><span class="o">,</span> <span class="nc">ServletResponse</span> <span class="n">servletResponse</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"service方法..."</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="cm">/**
+* 获取Servlet的一些信息,版本,作者等...
+*/</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getServletInfo</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+
+    <h3 id="servlet30">servlet3.0</h3>
+
+    <ul>
+      <li>
+        <p>优势: 支持注解配置,可以不需要配置web.xml</p>
+      </li>
+      <li>
+        <p>步骤</p>
+
+        <ol>
+          <li>
+            <p>创建JavaEE项目,选择Servlet的版本3.0以上,可以不创建web.xml</p>
+          </li>
+          <li>
+            <p>定义一个类,实现Servlet接口</p>
+          </li>
+          <li>
+            <p>在类上使用@WebServlet注解,进行配置</p>
+
+            <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// @WebServlet(urlPatterns = "/demo2")</span>
+<span class="c1">// @WebServlet(value = "/demo2")</span>
+<span class="nd">@WebServlet</span><span class="o">(</span><span class="s">"/demo2(资源路径)"</span><span class="o">)</span> <span class="c1">// 区别于与项目名命名的虚拟目录</span>
+</code></pre></div>            </div>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+:ET
