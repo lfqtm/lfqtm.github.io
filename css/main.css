@@ -27,7 +27,7 @@ html {
   -webkit-text-size-adjust: 100%; /* 2 */
 }
 body {
-  margin: -4px 0px 0px;
+  margin: -4px 0 0;
 }
 main {
   display: block;
