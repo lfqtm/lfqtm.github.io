@@ -22,14 +22,17 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Muse","version":"8.0.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
-  <meta property="og:type" content="article">
-<meta property="og:title" content="springboot-2020-05">
+  <meta name="description" content="logback日志集成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot日志">
 <meta property="og:url" content="https://github.com/lfqtm/lfqtm.github.io/2020/10/11/springboot-2020-05/index.html">
 <meta property="og:site_name" content="尔冬">
+<meta property="og:description" content="logback日志集成">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-10-11T07:54:06.000Z">
-<meta property="article:modified_time" content="2020-10-11T07:54:06.621Z">
+<meta property="article:modified_time" content="2020-10-11T08:38:00.492Z">
 <meta property="article:author" content="QinaLinKang">
+<meta property="article:tag" content="SpringBoot">
 <meta name="twitter:card" content="summary">
 
 
@@ -46,7 +49,7 @@
   };
 </script>
 
-  <title>springboot-2020-05 | 尔冬</title>
+  <title>springboot日志 | 尔冬</title>
   
 
 
@@ -166,7 +169,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           Table of Contents
@@ -178,6 +181,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB%E4%B8%8E%E5%88%86%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">2. 日志级别与分类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E7%BA%A7%E5%88%AB%E5%88%92%E5%88%86"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 级别划分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E5%88%86%E7%B1%BB"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 分类</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -265,7 +269,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          springboot-2020-05
+          springboot日志
         </h1>
 
         <div class="post-meta-container">
@@ -275,8 +279,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
+      
 
-      <time title="Created: 2020-10-11 15:54:06" itemprop="dateCreated datePublished" datetime="2020-10-11T15:54:06+08:00">2020-10-11</time>
+      <time title="Created: 2020-10-11 15:54:06 / Modified: 16:38:00" itemprop="dateCreated datePublished" datetime="2020-10-11T15:54:06+08:00">2020-10-11</time>
     </span>
 
   
@@ -289,7 +294,33 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        
+        <blockquote>
+<p>logback日志集成</p>
+</blockquote>
+<a id="more"></a>
+
+<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><blockquote>
+<p>logback是由log4j创始人的有一个开源日志组件,它分为以下模块</p>
+</blockquote>
+<ul>
+<li>logback-core：其它两个模块的基础模块</li>
+<li>logback-classic：它是log4j的一个改良版本，同时它完整实现了slf4j API使你可以很方便地更换成其它日志系统如log4j或JDK14 Logging</li>
+<li>logback-access：访问模块与Servlet容器集成提供通过Http来访问日志的功能</li>
+</ul>
+<h1 id="2-日志级别与分类"><a href="#2-日志级别与分类" class="headerlink" title="2. 日志级别与分类"></a>2. 日志级别与分类</h1><h2 id="2-1-级别划分"><a href="#2-1-级别划分" class="headerlink" title="2.1 级别划分"></a>2.1 级别划分</h2><blockquote>
+<p>DEBUG &lt; INFO &lt; WARN &lt; ERROR</p>
+</blockquote>
+<p>日志级别由低到高,越高级别的日志输出的信息越少</p>
+<h2 id="2-2-分类"><a href="#2-2-分类" class="headerlink" title="2.2 分类"></a>2.2 分类</h2><blockquote>
+<p>日志分为两类</p>
+</blockquote>
+<ul>
+<li><p>rootLogger: 监听项目中所有的运行日志,包括导入的jar包</p>
+</li>
+<li><p>logger: 监听项目中指定包的日志</p>
+</li>
+</ul>
+
     </div>
 
     
@@ -297,6 +328,9 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+          </div>
 
         
 
