@@ -36,10 +36,10 @@ custom_file_path:
 # ---------------------------------------------------------------
 
 # Schemes
-scheme: Muse
+#scheme: Muse
 #scheme: Mist
 #scheme: Pisces
-#scheme: Gemini
+scheme: Gemini
 
 # Dark Mode
 darkmode: false
@@ -82,14 +82,14 @@ creative_commons:
 # Value before `||` delimiter is the target link, value after `||` delimiter is the name of Font Awesome icon.
 # External url should start with http:// or https://
 menu:
-  #home: / || fa fa-home
-  #about: /about/ || fa fa-user
-  #tags: /tags/ || fa fa-tags
-  #categories: /categories/ || fa fa-th
-  #archives: /archives/ || fa fa-archive
-  #schedule: /schedule/ || fa fa-calendar
-  #sitemap: /sitemap.xml || fa fa-sitemap
-  #commonweal: /404/ || fa fa-heartbeat
+  home: / || fa fa-home
+  archives: /archives/ || fa fa-archive
+  tags: /tags/ || fa fa-tags
+  categories: /categories/ || fa fa-th
+  about: /about/ || fa fa-user
+  schedule: /schedule/ || fa fa-calendar
+  sitemap: /sitemap.xml || fa fa-sitemap
+  commonweal: /404/ || fa fa-heartbeat
 
 # Enable / Disable menu icons / item badges.
 menu_settings:
@@ -141,7 +141,7 @@ site_state: true
 # Key is the link label showing to end users.
 # Value before `||` delimiter is the target permalink, value after `||` delimiter is the name of Font Awesome icon.
 social:
-  #GitHub: https://github.com/yourname || fab fa-github
+  GitHub: https://github.com/lfqtm || fab fa-github
   #E-Mail: mailto:yourname@gmail.com || fa fa-envelope
   #Weibo: https://weibo.com/yourname || fab fa-weibo
   #Google: https://plus.google.com/yourname || fab fa-google
@@ -206,7 +206,7 @@ footer:
   copyright:
 
   # Powered by Hexo & NexT
-  powered: true
+  powered: false
 
   # Beian ICP and gongan information for Chinese users. See: https://beian.miit.gov.cn, http://www.beian.gov.cn
   beian:
