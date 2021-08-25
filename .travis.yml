@@ -1,13 +1,17 @@
 sudo: false
 language: node_js
 node_js:
-  - 10 # use nodejs v10 LTS
-cache: npm
+  - 12 # use nodejs v12 LTS
+cache:
+  apt: true
+  directories:
+    - node_modules
 branches:
   only:
     - main # build master branch only
 script:
-  - hexo generate # generate static files
+  - hexo clean  #清除
+  - hexo generate #生成
 deploy:
   provider: pages
   skip-cleanup: true
