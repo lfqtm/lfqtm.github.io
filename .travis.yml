@@ -16,5 +16,9 @@ deploy:
   on:
     branch: main
   local-dir: public
+env:
+  - TRAVIS_NODE_VERSION="12.4.0"
 install:
-  - yarn
+  - nvm install TRAVIS_NODE_VERSION
+  - nvm alias default TRAVIS_NODE_VERSION
+  - npm install
