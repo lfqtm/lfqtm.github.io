@@ -21,23 +21,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"lfqtm.github.io","root":"/","images":"/images","scheme":"Gemini","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta property="og:type" content="website">
-<meta property="og:title" content="将心事化为乌有">
-<meta property="og:url" content="https://lfqtm.github.io/index.html">
+<meta name="description" content="近期开发任务中,有一个需求是拉取其他多个的接口的数据存入到表单中; 并且多个接口之间并没有什么太大的关联性, 并且没有顺序要求, 考虑使用线程池去处理这样任务. 且由于数据量较大, 考虑使用callable线程去并发拉取数据, 获取数据后再进行处理   1. 线程池1.1 引入线程池的目的我们知道,创建和销毁线程是一件十分损耗内存资源的, 在一个应用程序中，如果需要多次使用线程，也就意味着，我们">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多线程拉取账单数据">
+<meta property="og:url" content="https://lfqtm.github.io/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/index.html">
 <meta property="og:site_name" content="将心事化为乌有">
+<meta property="og:description" content="近期开发任务中,有一个需求是拉取其他多个的接口的数据存入到表单中; 并且多个接口之间并没有什么太大的关联性, 并且没有顺序要求, 考虑使用线程池去处理这样任务. 且由于数据量较大, 考虑使用callable线程去并发拉取数据, 获取数据后再进行处理   1. 线程池1.1 引入线程池的目的我们知道,创建和销毁线程是一件十分损耗内存资源的, 在一个应用程序中，如果需要多次使用线程，也就意味着，我们">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-08-28T10:51:53.000Z">
+<meta property="article:modified_time" content="2021-09-06T13:48:47.829Z">
 <meta property="article:author" content="lfqtm">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="E9">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://lfqtm.github.io/">
+<link rel="canonical" href="https://lfqtm.github.io/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"en","comments":"","permalink":"","path":"index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://lfqtm.github.io/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/","path":"2021/08/28/多线程拉取账单数据/","title":"多线程拉取账单数据"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>将心事化为乌有</title>
+<title>多线程拉取账单数据 | 将心事化为乌有</title>
   
 
 
@@ -106,7 +112,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           Table of Contents
@@ -119,6 +125,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">1. 线程池</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E5%BC%95%E5%85%A5%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E7%9B%AE%E7%9A%84"><span class="nav-number">1.0.1.</span> <span class="nav-text">1.1 引入线程池的目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-%E5%9B%9B%E7%A7%8D%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.0.2.</span> <span class="nav-text">1.2 四种常用的线程池</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Callable%E7%BA%BF%E7%A8%8B%E5%92%8CFutureTask%E7%BB%84%E8%A3%85%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">2. Callable线程和FutureTask组装数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AE%9E%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">3. 实战</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -172,100 +179,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://lfqtm.github.io/2021/09/06/[maven]maven%E4%B8%80%E8%A7%88/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="lfqtm">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="将心事化为乌有">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/06/%5Bmaven%5Dmaven%E4%B8%80%E8%A7%88/" class="post-title-link" itemprop="url">maven基础知识一览</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-09-06 09:45:53 / Modified: 13:48:47" itemprop="dateCreated datePublished" datetime="2021-09-06T09:45:53+00:00">2021-09-06</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>maven作为java项目构建的常用工具,必须掌握</p>
-</blockquote>
-<h3 id="一-从开发模式和软件构建方式说起"><a href="#一-从开发模式和软件构建方式说起" class="headerlink" title="一.从开发模式和软件构建方式说起"></a>一.从开发模式和软件构建方式说起</h3><h4 id="1-1-瀑布式还是敏捷式"><a href="#1-1-瀑布式还是敏捷式" class="headerlink" title="1.1 瀑布式还是敏捷式"></a>1.1 瀑布式还是敏捷式</h4><p>项目实践中,开发模式中较为常见的有 <strong>瀑布式开发模式</strong> 和 <strong>敏捷开发模式</strong>, 简单介绍如下:</p>
-<ul>
-<li>瀑布式</li>
-</ul>
-<p>有<em>严格的开发阶段和完备的开发文档</em>, 追求稳定和阶段化, 适合于需求相对稳定, 周期较长的大型的项目;</p>
-<ul>
-<li>敏捷开发</li>
-</ul>
-<p><em>快速迭代,拥抱变化</em>. 首先把客户最关注的软件原型先做出来，交付或者上线，在实际场景中去修改弥补需求中的不足，快速修改，再次发布版本;</p>
-<h4 id="1-2-项目构建工具"><a href="#1-2-项目构建工具" class="headerlink" title="1.2 项目构建工具"></a>1.2 项目构建工具</h4><p>从早期的ant构建到maven再到gradle, 大致的进程是去复杂化, 简洁化. ant成为历史, 原因在于xml脚本的编写过于复杂, 但对构建过程中的控制十分细化; maven: 项目对象模型,填补了ant的缺点, 同时支持从网络获取jar文件,另外maven更专注于依赖管理; gradle结合了以上两个的优点, dsl格式使得脚本的编写更加简洁.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/06/%5Bmaven%5Dmaven%E4%B8%80%E8%A7%88/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
     <link itemprop="mainEntityOfPage" href="https://lfqtm.github.io/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -278,9 +202,9 @@
       <meta itemprop="name" content="将心事化为乌有">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/" class="post-title-link" itemprop="url">多线程拉取账单数据</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          多线程拉取账单数据
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -310,7 +234,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <blockquote>
+        <blockquote>
 <p>近期开发任务中,有一个需求是拉取其他多个的接口的数据存入到表单中; 并且多个接口之间并没有什么太大的关联性, 并且没有顺序要求, 考虑使用线程池去处理这样任务. 且由于数据量较大, 考虑使用callable线程去并发拉取数据, 获取数据后再进行处理</p>
 </blockquote>
 <hr>
@@ -323,15 +247,15 @@
 </ul>
 <hr>
 <h2 id="2-Callable线程和FutureTask组装数据"><a href="#2-Callable线程和FutureTask组装数据" class="headerlink" title="2. Callable线程和FutureTask组装数据"></a>2. Callable线程和FutureTask组装数据</h2><p>Callable是创建多线程的方式之一, 它可以有返回值，也可以抛出异常的特性;<br>FutureTask是一个可取消的异步计算。FutureTask提供了对Future的基本实现，可以调用方法去开始和取消一个计算，可以查询计算是否完成并且获取计算结果;</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/28/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8B%89%E5%8F%96%E8%B4%A6%E5%8D%95%E6%95%B0%E6%8D%AE/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
+<span id="more"></span>
+
+<p><strong>一个简单的demo展示:</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">FutureTask futureTask=new FutureTask(new Callable() &#123;</span><br><span class="line">   @Override</span><br><span class="line">     public String call() throws Exception &#123;</span><br><span class="line">         Thread.sleep(3000);</span><br><span class="line">         System.out.println(&quot;calld方法执行了&quot;);</span><br><span class="line">         return &quot;call方法返回值&quot;;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"> futureTask.run();</span><br><span class="line"> System.out.println(&quot;获取返回值: &quot; + futureTask.get());</span><br><span class="line"> FutureTask futureTask1=new FutureTask(new Callable() &#123;</span><br><span class="line">     @Override</span><br><span class="line">     public String call() throws Exception &#123;</span><br><span class="line">         Thread.sleep(3000);</span><br><span class="line">         System.out.println(&quot;calld方法执行了1&quot;);</span><br><span class="line">         return &quot;call方法返回值1&quot;;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"> futureTask1.run();</span><br><span class="line"> System.out.println(&quot;获取返回值1: &quot; + futureTask1.get());</span><br></pre></td></tr></table></figure>
+
+<p>在上述的需求当中,由于接口拉取数据是没有先后关系的, 我们可以单独去通过线程池创建多个callable线程, 并通过FutureTask获取异步线程拉取到的数据并组装数据.</p>
+<hr>
+<h2 id="3-实战"><a href="#3-实战" class="headerlink" title="3. 实战"></a>3. 实战</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService executorService = Executors.newCachedThreadPool();</span><br><span class="line">    CompletionService&lt;Map&lt;String, String&gt;&gt; cs = new ExecutorCompletionService&lt;&gt;(executorService);</span><br><span class="line">    Callable compareCallable = () -&gt; getCompareInfo(request);</span><br><span class="line">    </span><br><span class="line">    Callable getDeptInfoCallable = () -&gt; getDeptInfo(request);</span><br><span class="line">    </span><br><span class="line">    Callable getPaymentDetailInfoCallable = () -&gt; getPaymentDetailInfo(request);</span><br><span class="line">    </span><br><span class="line">    Callable getAllowanceDetailCallable = () -&gt; getAllowanceDetail(request);</span><br><span class="line">    //构建futureTask任务，控制返回顺序</span><br><span class="line">    FutureTask&lt;Map&lt;String, String&gt;&gt; futureTask1 = new FutureTask&lt;Map&lt;String, String&gt;&gt;(compareCallable);</span><br><span class="line">    FutureTask&lt;Map&lt;String, String&gt;&gt; futureTask2 = new FutureTask&lt;Map&lt;String, String&gt;&gt;(getDeptInfoCallable);</span><br><span class="line">    FutureTask&lt;Map&lt;String, String&gt;&gt; futureTask3 = new FutureTask&lt;Map&lt;String, String&gt;&gt;(getPaymentDetailInfoCallable);</span><br><span class="line">    FutureTask&lt;Map&lt;String, String&gt;&gt; futureTask4 = new FutureTask&lt;Map&lt;String, String&gt;&gt;(getAllowanceDetailCallable);</span><br><span class="line">    StopWatch sw = new StopWatch(&quot;差旅对账接口调用耗时&quot;);</span><br><span class="line">    sw.start(&quot;对比信息&quot;);</span><br><span class="line">    executorService.submit(futureTask1);</span><br><span class="line">    sw.stop();</span><br><span class="line">    sw.start(&quot;账单汇总&quot;);</span><br><span class="line">    executorService.submit(futureTask2);</span><br><span class="line">    sw.stop();</span><br><span class="line">    sw.start(&quot;账单明细&quot;);</span><br><span class="line">    executorService.submit(futureTask3);</span><br><span class="line">    sw.stop();</span><br><span class="line">    sw.start(&quot;差补明细&quot;);</span><br><span class="line">    executorService.submit(futureTask4);</span><br><span class="line">    sw.stop();</span><br><span class="line">    log.info(&quot;差旅对账接口调用耗时汇总&quot; + sw.prettyPrint());</span><br><span class="line">    //获取对比信息</span><br><span class="line">    String compareResult = (futureTask1.get()).get(&quot;compareResult&quot;);</span><br><span class="line">    //获取差补行程信息</span><br><span class="line">    String orderSettlementDetailJson = (futureTask3.get()).get(&quot;orderSettlementDetailJson&quot;);</span><br><span class="line">    //获取补贴数据</span><br><span class="line">    String allowanceDetailJson = (futureTask4.get()).get(&quot;allowanceDetailJson&quot;);</span><br><span class="line">    Map&lt;String, String&gt; temp = futureTask2.get();</span><br><span class="line">    String allowanceSummaryRes = temp.get(&quot;allowanceSummaryRes&quot;);</span><br><span class="line">    String snapshotInfoRes = temp.get(&quot;snapshotInfoRes&quot;);</span><br></pre></td></tr></table></figure>
+
     </div>
 
     
@@ -339,11 +263,26 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+              <a href="/tags/E9/" rel="tag"># E9</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/09/06/%5Bmaven%5Dmaven%E4%B8%80%E8%A7%88/" rel="next" title="maven基础知识一览">
+                  maven基础知识一览 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
     </footer>
   </article>
 </div>
+
 
 
 
