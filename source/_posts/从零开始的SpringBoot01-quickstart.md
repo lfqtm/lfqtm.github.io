@@ -45,6 +45,7 @@ public class App {
 - multipart/form-data, 不能处理（即使用@RequestBody不能处理这种格式的数据）； 
 - 其他格式， 必须（其他格式包括application/json, application/xml等。这些格式的数据，必须使用@RequestBody来处理）；
 
+<!--more-->
 #### 3.2 @Controller
 
 控制器Controller 负责处理由DispatcherServlet 分发的请求，它把用户请求的数据经过业务处理层处理之后封装成一个Model ，然后再把该Model 返回给对应的View 进行展示。
